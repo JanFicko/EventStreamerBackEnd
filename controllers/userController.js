@@ -4,24 +4,24 @@ let database = require('../database/database');
 
 class UserController  {
 
-    static createUser(email, password, callback){
+    static async createUser(email, password){
         if(!validateHelper.validateEmail(email)){
             callback({success:false, status: 'Email not valid'});
             return;
         }
 
-       /* let newUser = new User(undefined, email, password, Date.now(), undefined);
-        new database.User(newUser).save(null, { method: 'insert' });*/
+        return await new database.User()
+            .save(new User(undefined, email, password, Date.now(), undefined))
+            .then(() => {
+                return {success:true};
+            })
+            .catch((error) => {
+                return {success:false, status:error};
+            });
 
-       async function test() {
-           let newUser = new User(undefined, email, password, Date.now(), undefined);
-           const testuser = await new database.User(newUser).save(null, { method: 'insert' });
-        }
-
-        callback({success:true});
     }
 
-    static updateUser(userId, email, password, callback){
+    static async updateUser(userId, email, password){
         if(!validateHelper.validateEmail(email)){
             callback({success:false, status: 'Email not valid'});
             return;
@@ -31,12 +31,13 @@ class UserController  {
         //let user = new User(userId, email, password);
         callback({success:true});
     }
-    static deleteUser(userId, callback){
+
+    static async deleteUser(userId, callback){
         // TODO: Delete user
         callback({success:true});
     }
 
-    static getAllUsers(callback) {
+    static async getAllUsers(callback) {
         // TODO: Get all users from DB
         callback([
             {userId: 1, email: "jan.ficko@gmail.com"},
@@ -45,7 +46,7 @@ class UserController  {
         ]);
     }
 
-    static findUserById(userId, callback) {
+    static async findUserById(userId, callback) {
         new database.User({userId : userId})
             .fetch()
             .then((model) => {
@@ -56,7 +57,7 @@ class UserController  {
             });
     }
 
-    static findUsersByQuery(query, callback) {
+    static async findUsersByQuery(query, callback) {
         // TODO: Find post from DB by event ID
         callback([
             {postId: 1, comment: "Komentar 1"},
