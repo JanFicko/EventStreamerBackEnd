@@ -1,17 +1,15 @@
 let User = require('../models/user');
 let validateHelper = require('../helpers/validateHelper');
-let database = require('../database/database');
 
 class UserController  {
 
-    static async createUser(email, password){
+    static createUser(email, password){
         if(!validateHelper.validateEmail(email)){
-            callback({success:false, status: 'Email not valid'});
-            return;
+            return {success:false, status: 'Email not valid'};
         }
 
-        return await new database.User()
-            .save(new User(undefined, email, password, Date.now(), undefined))
+        return new User.userModel()
+            .save(new User(undefined, email, password, Date.now(), undefined), {method:"insert"})
             .then(() => {
                 return {success:true};
             })
@@ -21,52 +19,54 @@ class UserController  {
 
     }
 
-    static async updateUser(userId, email, password){
+    static updateUser(userId, email, password){
         if(!validateHelper.validateEmail(email)){
-            callback({success:false, status: 'Email not valid'});
-            return;
+            return {success:false, status: 'Email not valid'};
         }
-
-        // TODO: Update into DB
-        //let user = new User(userId, email, password);
-        callback({success:true});
-    }
-
-    static async deleteUser(userId, callback){
-        // TODO: Delete user
-        callback({success:true});
-    }
-
-    static async getAllUsers(callback) {
-        // TODO: Get all users from DB
-        callback([
-            {userId: 1, email: "jan.ficko@gmail.com"},
-            {userId: 2, email: "urban.kos93@gmail.com"},
-            {userId: 3, email: "matej.mbssk@gmail.com"}
-        ]);
-    }
-
-    static async findUserById(userId, callback) {
-        new database.User({userId : userId})
-            .fetch()
-            .then((model) => {
-                if(model == null)
-                    callback({success: false});
-                else
-                    callback({success: true, data :model});
+        return new User.userModel()
+            .where("userId", "=", userId)
+            .save(new User(userId, email, password, undefined, Date.now()), {method:"update", patch: true})
+            .then(() => {
+                return {success:true};
+            })
+            .catch((error) => {
+                return {success:false, status:error};
             });
     }
 
-    static async findUsersByQuery(query, callback) {
-        // TODO: Find post from DB by event ID
-        callback([
-            {postId: 1, comment: "Komentar 1"},
-            {postId: 2, comment: "Komentar 2"},
-            {postId: 3, comment: "Komentar 3"},
-            {postId: 4, comment: "Komentar 4"},
-            {postId: 5, comment: "Komentar 5"},
-            {postId: 6, comment: "Komentar 6"}
-        ]);
+    static deleteUser(userId){
+        return new User.userModel()
+            .where("userId", "=", userId)
+            .destroy()
+            .then(() => {
+                return {success:true};
+            })
+            .catch((error) => {
+                return {success:false, status:error};
+            });
+    }
+
+    static getAllUsers() {
+        return new User.userModel()
+            .fetchAll()
+            .then((users) => {
+                return users;
+            })
+            .catch((error) => {
+                return {success:false, status:error};
+            });
+    }
+
+    static findUserById(userId) {
+        return new User.userModel()
+            .where("userId", "=", userId)
+            .fetch()
+            .then((user) => {
+                return user;
+            })
+            .catch((error) => {
+                return {success:false, status:error};
+            });
     }
 
 }

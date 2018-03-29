@@ -3,74 +3,74 @@ const router = express.Router();
 const eventController = require('../controllers/eventController');
 
 /* CREATE */
-router.post('/', function(req, res, next) {
-    const { name } = req.body;
-    if (!name) {
-        res.status(400).send({status: 'Data not received'});
+router.route('/').post(async (req, res, next) => {
+    const { name, userId } = req.body;
+    if (!name || !userId) {
+        res.status(400).send({success:false, status: "Data not received"});
+    } else if(isNaN(parseInt(userId))){
+        res.status(500).send({success:false, status: "ID is not a number"});
     } else {
-        eventController.createEvent(name,
-            (createEventResponse) => {
-                if(!createEventResponse.success){
-                    res.status(406).send(createEventResponse);
-                } else {
-                    res.status(201).send({success: true});
-                }
-            });
+        const createEventResponse = await eventController.createEvent(name, userId);
+        if(!createEventResponse.success){
+            res.status(406);
+        } else {
+            res.status(201);
+        }
+        res.send(createEventResponse);
     }
 });
 
 /* READ */
-router.get("/", function(req, res, next) {
-    eventController.getAllEvents(
-        (getAllEventsResponse) => {
-            res.status(200).send(getAllEventsResponse);
-        });
+router.route("/").get(async (req, res, next) => {
+    res.status(200).send(await eventController.getAllEvents());
 });
-router.get('/:id', function(req, res, next) {
-    let eventId = parseInt(req.params.id);
-    if(isNaN(eventId)){
-        res.status(500).send("ID ni stevilo");
+router.route('/:query').get(async (req, res, next) => {
+    const query = parseInt(req.params.query);
+    if(isNaN(query)){
+        res.status(200).send(await eventController.findEventsByQuery(query));
     } else {
-        eventController.findEventById(eventId,
-            (findEventByIdResponse) => {
-                res.status(200).send(findEventByIdResponse);
-            });
+        const events = await eventController.findEventById(query);
+        if(!events){
+            res.status(204).send();
+        } else {
+            res.status(200).send(events);
+        }
     }
 });
 
 /* UPDATE */
-router.put('/', function(req, res, next) {
+router.route('/').put(async (req, res, next) => {
     const { eventId, name } = req.body;
     if (!eventId || !name) {
-        res.status(400).send({status: 'Data not received'});
+        res.status(400).send({success:false, status: "Data not received"});
+    } else if(isNaN(parseInt(eventId))){
+        res.status(500).send({success:false, status: "ID is not a number"});
     } else {
-        eventController.updateEvent(eventId, name,
-            (updateEventResponse) => {
-                if(!updateEventResponse.success){
-                    res.status(406).send(updateEventResponse);
-                } else {
-                    res.status(202).send({success: true});
-                }
-            });
+        const updateEventResponse = await eventController.updateEvent(eventId, name);
+        if(!updateEventResponse.success){
+            res.status(406);
+        } else {
+            res.status(202);
+        }
+        res.send(updateEventResponse)
     }
 });
 
 /* DELETE */
-router.delete('/', function(req, res, next) {
+router.route('/').delete(async (req, res, next) => {
     let eventId = req.body.eventId;
     if (!eventId) {
-        res.status(400).send({status: 'Data not received'});
+        res.status(400).send({success:false, status: "Data not received"});
     } else if(isNaN(parseInt(eventId))){
-        res.status(500).send("ID ni stevilo");
+        res.status(500).send({success:false, status: "ID is not a number"});
     } else {
-        eventController.deleteEvent(eventId,
-            (deleteEventResponse) => {
-                if(!deleteEventResponse.success){
-                    res.status(404).send(deleteEventResponse);
-                } else {
-                    res.status(202).send({success: true});
-                }
-            });
+        const deleteEventResponse = await eventController.deleteEvent(eventId);
+        if(!deleteEventResponse.success){
+            res.status(404)
+        } else {
+            res.status(202);
+        }
+        res.send(deleteEventResponse);
     }
 });
 

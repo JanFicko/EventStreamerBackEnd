@@ -6,7 +6,7 @@ const userController = require('../controllers/userController');
 router.route('/').post(async (req, res, next) => {
     const { email, password } = req.body;
     if (!email || !password) {
-        res.status(400).send({status: 'Data not received'});
+        res.status(400).send({success:false, status: "Data not received"});
     } else {
         const createUserResponse = await userController.createUser(email, password);
         if(!createUserResponse.success){
@@ -22,12 +22,17 @@ router.route('/').post(async (req, res, next) => {
 router.route("/").get(async (req, res, next) => {
     res.status(200).send(await userController.getAllUsers());
 });
-router.route('/:query').get(async (req, res, next) => {
-    const query = parseInt(req.params.query);
-    if(isNaN(query)){
-        res.status(200).send(await userController.findUsersByQuery(query));
+router.route('/:id').get(async (req, res, next) => {
+    const id = parseInt(req.params.id);
+    if(isNaN(id)){
+        res.status(400 ).send({success:false, status: "ID is not a number"});
     } else {
-        res.status(200).send(await userController.findUserById(query));
+        const users = await userController.findUserById(id);
+        if(!users){
+            res.status(204).send();
+        } else {
+            res.status(200).send(users);
+        }
     }
 });
 
@@ -35,7 +40,9 @@ router.route('/:query').get(async (req, res, next) => {
 router.route('/').put(async (req, res, next) => {
     const { userId, email, password } = req.body;
     if (!userId || !email || !password) {
-        res.status(400).send({status: 'Data not received'});
+        res.status(400).send({success:false, status: "Data not received"});
+    } else if(isNaN(parseInt(userId))){
+        res.status(500).send({success:false, status: "ID is not a number"});
     } else {
         const updateUserResponse = await userController.updateUser(userId, email, password);
         if(!updateUserResponse.success){
@@ -51,9 +58,9 @@ router.route('/').put(async (req, res, next) => {
 router.route('/').delete(async (req, res, next) => {
     let userId = req.body.userId;
     if (!userId) {
-        res.status(400).send({status: 'Data not received'});
+        res.status(400).send({success:false, status: "Data not received"});
     } else if(isNaN(parseInt(userId))){
-        res.status(500).send("ID ni stevilo");
+        res.status(500).send({success:false, status: "ID is not a number"});
     } else {
         const deleteUserResponse = await userController.deleteUser(userId);
         if(!deleteUserResponse.success){

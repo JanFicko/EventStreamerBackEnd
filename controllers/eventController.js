@@ -1,39 +1,80 @@
 let Event = require('../models/event');
+let userController = require('../controllers/userController');
 
 class EventController  {
 
-    static createEvent(name, callback){
+    static async createEvent(name, userId){
+        const user = await userController.findUserById(userId);
+        if(!user){
+            return {success:false, status:"User does not exist"};
+        }
 
-        // TODO: Insert into DB
-        //let event = new Event(undefined, name);
-        callback({success:true});
+        return new Event.eventModel()
+            .save(new Event(undefined, name, Date.now(), undefined, userId), {method:"insert"})
+            .then(() => {
+                return {success:true};
+            })
+            .catch((error) => {
+                return {success:false, status:error};
+            });
     }
 
-    static updateEvent(eventId, name, callback){
-
-        // TODO: Update into DB
-        //let event = new Event(eventId, name);
-        callback({success:true});
+    static updateEvent(eventId, name){
+        return new Event.eventModel()
+            .where("eventId", "=", eventId)
+            .save(new Event(eventId, name, undefined, Date.now(), undefined), {method:"update", patch: true})
+            .then(() => {
+                return {success:true};
+            })
+            .catch((error) => {
+                return {success:false, status:error};
+            });
     }
-    static deleteEvent(eventId, callback){
-        // TODO: Delete event
-        callback({success:true});
+    static deleteEvent(eventId){
+        return new Event.eventModel()
+            .where("eventId", "=", eventId)
+            .destroy()
+            .then(() => {
+                return {success:true};
+            })
+            .catch((error) => {
+                return {success:false, status:error};
+            });
     }
 
-    static getAllEvents(callback) {
-        // TODO: Get all events from DB
-        callback([
-            {eventId: 1, name: "Formula 1 testiranje"},
-            {eventId: 2, name: "Nogometna tekma"},
-            {eventId: 3, name: "Izredni dogodek"}
-        ]);
+    static getAllEvents() {
+        return new Event.eventModel()
+            .fetchAll()
+            .then((events) => {
+                return events;
+            })
+            .catch((error) => {
+                return {success:false, status:error};
+            });
     }
 
-    static findEventById(eventId, callback) {
-        // TODO: Find user from DB by ID
-        callback(
-            {eventId: eventId, name: "Formula 1 testiranje"}
-        );
+    static findEventById(eventId) {
+        return new Event.eventModel()
+            .where("eventId", "=", eventId)
+            .fetch()
+            .then((event) => {
+                return event;
+            })
+            .catch((error) => {
+                return {success:false, status:error};
+            });
+    }
+
+    static findEventsByQuery(query) {
+        return new Event.eventModel()
+            .where("name = " + query)
+            .fetchAll()
+            .then((events) => {
+                return events;
+            })
+            .catch((error) => {
+                return {success:false, status:error};
+            });
     }
 
 }
