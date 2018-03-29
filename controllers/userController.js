@@ -18,6 +18,23 @@ class UserController  {
             });
 
     }
+    static loginUser(email, password){
+        if(!validateHelper.validateEmail(email)){
+            return {success:false, status: 'Email not valid'};
+        }
+
+        return new User.userModel()
+            .where("email", "=", email)
+            .where("password", "=", password)
+            .fetch()
+            .then((user) => {
+                return user;
+            })
+            .catch(() => {
+                return {success:false, status:"Wrong user data"};
+            });
+
+    }
 
     static updateUser(userId, email, password){
         if(!validateHelper.validateEmail(email)){

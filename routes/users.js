@@ -36,6 +36,20 @@ router.route('/:id').get(async (req, res, next) => {
     }
 });
 
+router.route('/login').post(async (req, res, next) => {
+    const { email, password } = req.body;
+    if (!email || !password) {
+        res.status(400).send({success:false, status: "Data not received"});
+    } else {
+        const createUserResponse = await userController.loginUser(email, password);
+        if(!createUserResponse){
+            res.status(204).send();
+        } else {
+            res.status(200).send(createUserResponse);
+        }
+    }
+});
+
 /* UPDATE */
 router.route('/').put(async (req, res, next) => {
     const { userId, email, password } = req.body;
