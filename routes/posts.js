@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const postController = require('../controllers/postController');
+const PostController = require('../controllers/postController');
 
 /* CREATE */
 router.route('/').post(async (req, res, next) => {
@@ -10,7 +10,7 @@ router.route('/').post(async (req, res, next) => {
     } else if(isNaN(parseInt(eventId)) || isNaN(parseInt(eventId))){
         res.status(500).send({success:false, status: "ID is not a number"});
     } else {
-        const createPostResponse = await postController.createPost(comment, eventId, userId);
+        const createPostResponse = await PostController.createPost(comment, eventId, userId);
         if(!createPostResponse.success){
             res.status(406);
         } else {
@@ -26,7 +26,7 @@ router.route('/:eventId').get(async (req, res, next) => {
     if(isNaN(eventId)){
         res.status(400).send({success:false, status: "ID is not a number"});
     } else {
-        res.status(200).send(await postController.findPostsByEventId(eventId));
+        res.status(200).send(await PostController.findPostsByEventId(eventId));
     }
 });
 
@@ -38,7 +38,7 @@ router.route('/').put(async (req, res, next) => {
     } else if(isNaN(parseInt(postId))){
         res.status(500).send({success:false, status: "ID is not a number"});
     } else {
-        const updatePostResponse = await postController.updatePost(comment, postId);
+        const updatePostResponse = await PostController.updatePost(comment, postId);
         if(!updatePostResponse.success){
             res.status(406);
         } else {
@@ -56,7 +56,7 @@ router.route('/').delete(async (req, res, next) => {
     } else if(isNaN(parseInt(postId))){
         res.status(500).send({success:false, status: "ID is not a number"});
     } else {
-        const deletePostResponse = await postController.deletePost(postId);
+        const deletePostResponse = await PostController.deletePost(postId);
         if(!deletePostResponse.success){
             res.status(404)
         } else {

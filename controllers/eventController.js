@@ -1,10 +1,10 @@
 let Event = require('../models/event');
-let userController = require('../controllers/userController');
+let UserController = require('../controllers/userController');
 
 class EventController  {
 
     static async createEvent(name, userId){
-        const user = await userController.findUserById(userId);
+        const user = await UserController.findUserById(userId);
         if(!user){
             return {success:false, status:"User does not exist"};
         }

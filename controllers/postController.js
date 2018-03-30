@@ -1,15 +1,15 @@
 let Post = require('../models/post');
-let eventController = require('../controllers/eventController');
-let userController = require('../controllers/userController');
+let EventController = require('../controllers/eventController');
+let UserController = require('../controllers/userController');
 
 class PostController  {
 
     static async createPost(comment, eventId, userId){
-        const event = await eventController.findEventById(eventId);
+        const event = await EventController.findEventById(eventId);
         if(!event){
             return {success:false, status:"Event does not exist"};
         }
-        const user = await userController.findUserById(userId);
+        const user = await UserController.findUserById(userId);
         if(!user){
             return {success:false, status:"User does not exist"};
         }

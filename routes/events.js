@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const eventController = require('../controllers/eventController');
+const EventController = require('../controllers/eventController');
 
 /* CREATE */
 router.route('/').post(async (req, res, next) => {
@@ -10,7 +10,7 @@ router.route('/').post(async (req, res, next) => {
     } else if(isNaN(parseInt(userId))){
         res.status(500).send({success:false, status: "ID is not a number"});
     } else {
-        const createEventResponse = await eventController.createEvent(name, userId);
+        const createEventResponse = await EventController.createEvent(name, userId);
         if(!createEventResponse.success){
             res.status(406);
         } else {
@@ -22,14 +22,14 @@ router.route('/').post(async (req, res, next) => {
 
 /* READ */
 router.route("/").get(async (req, res, next) => {
-    res.status(200).send(await eventController.getAllEvents());
+    res.status(200).send(await EventController.getAllEvents());
 });
 router.route('/:query').get(async (req, res, next) => {
     const query = parseInt(req.params.query);
     if(isNaN(query)){
-        res.status(200).send(await eventController.findEventsByQuery(query));
+        res.status(200).send(await EventController.findEventsByQuery(query));
     } else {
-        const events = await eventController.findEventById(query);
+        const events = await EventController.findEventById(query);
         if(!events){
             res.status(204).send();
         } else {
@@ -46,7 +46,7 @@ router.route('/').put(async (req, res, next) => {
     } else if(isNaN(parseInt(eventId))){
         res.status(500).send({success:false, status: "ID is not a number"});
     } else {
-        const updateEventResponse = await eventController.updateEvent(eventId, name);
+        const updateEventResponse = await EventController.updateEvent(eventId, name);
         if(!updateEventResponse.success){
             res.status(406);
         } else {
@@ -64,7 +64,7 @@ router.route('/').delete(async (req, res, next) => {
     } else if(isNaN(parseInt(eventId))){
         res.status(500).send({success:false, status: "ID is not a number"});
     } else {
-        const deleteEventResponse = await eventController.deleteEvent(eventId);
+        const deleteEventResponse = await EventController.deleteEvent(eventId);
         if(!deleteEventResponse.success){
             res.status(404)
         } else {

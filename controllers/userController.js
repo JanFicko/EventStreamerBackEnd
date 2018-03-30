@@ -1,10 +1,10 @@
 let User = require('../models/user');
-let validateHelper = require('../helpers/validateHelper');
+let ValidateHelper = require('../helpers/validateHelper');
 
 class UserController  {
 
     static createUser(email, password){
-        if(!validateHelper.validateEmail(email)){
+        if(!ValidateHelper.validateEmail(email)){
             return {success:false, status: 'Email not valid'};
         }
 
@@ -19,7 +19,7 @@ class UserController  {
 
     }
     static loginUser(email, password){
-        if(!validateHelper.validateEmail(email)){
+        if(!ValidateHelper.validateEmail(email)){
             return {success:false, status: 'Email not valid'};
         }
 
@@ -37,7 +37,7 @@ class UserController  {
     }
 
     static updateUser(userId, email, password){
-        if(!validateHelper.validateEmail(email)){
+        if(!ValidateHelper.validateEmail(email)){
             return {success:false, status: 'Email not valid'};
         }
         return new User.userModel()
