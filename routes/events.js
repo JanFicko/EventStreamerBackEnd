@@ -4,6 +4,7 @@ const EventController = require('../controllers/eventController');
 
 /* CREATE */
 router.route('/').post(async (req, res, next) => {
+    console.log(req.body);
     const { name, userId } = req.body;
     if (!name || !userId) {
         res.status(400).send({success:false, status: "Data not received"});

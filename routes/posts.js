@@ -1,6 +1,13 @@
 const express = require('express');
+const app = express();
 const router = express.Router();
 const PostController = require('../controllers/postController');
+const http = require('http').Server(app);
+//const io = require('socket.io')(http);
+
+/*io.on('connection', function(socket){
+    console.log('a user connected');
+});*/
 
 /* CREATE */
 router.route('/').post(async (req, res, next) => {
@@ -14,6 +21,11 @@ router.route('/').post(async (req, res, next) => {
         if(!createPostResponse.success){
             res.status(406);
         } else {
+            /*io.on('connection', function(socket){
+                socket.on('chat message', function(msg){
+                    io.emit('chat message', msg);
+                });
+            });*/
             res.status(201);
         }
         res.send(createPostResponse);
