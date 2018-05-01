@@ -18,9 +18,6 @@ User.userModel = bookshelf.Model.extend({
     idAttribute: 'id',
     event: function() {
         return this.belongsTo(Event.eventModel, "eventId");
-    },
-    post: function() {
-        return this.belongsTo(Post.postModel, "postId");
     }
 });
 
