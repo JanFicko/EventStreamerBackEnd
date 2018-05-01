@@ -6,7 +6,6 @@ exports.up = function(knex, Promise) {
         table.datetime("timeCreated").notNullable();
         table.datetime("timeUpdated");
         table.integer("eventId").references("event.id");
-        table.integer("userId").references("user.id");
     });
 };
 
