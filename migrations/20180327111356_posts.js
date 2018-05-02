@@ -2,7 +2,8 @@
 exports.up = function(knex, Promise) {
     return knex.schema.createTable("post", (table) => {
         table.increments("postId").primary();
-        table.text("comment").notNullable();
+        table.text("comment");
+        table.text("image");
         table.datetime("timeCreated").notNullable();
         table.datetime("timeUpdated");
         table.integer("eventId").references("event.id");

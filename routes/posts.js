@@ -4,26 +4,57 @@ const router = express.Router();
 const PostController = require('../controllers/postController');
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-
-/*io.on('connection', function(socket){
-    console.log('a user connected');
-});*/
+const fs = require("fs");
+const multer = require('multer');
 
 io.on("connection", (socket) => {
 
+    let storage = multer.diskStorage({
+        destination: function (req, file, cb){
+            cb(null, "public/uploads/");
+        },
+        filename: function (req, file, cb){
+            cb(null, Date.now() + ".png");
+        }
+    });
+    let upload = multer({
+        storage: storage
+    });
+
     /* CREATE */
-    router.route('/').post(async (req, res, next) => {
+    router.route('/').post(upload.single("image"), async (req, res, next) => {
         const { comment, eventId} = req.body;
-        if (!comment || !eventId) {
+        if (!eventId) {
             res.status(400).send({success:false, status: "Data not received"});
-        } else if(isNaN(parseInt(eventId)) || isNaN(parseInt(eventId))){
+        } else if(isNaN(parseInt(eventId))){
             res.status(500).send({success:false, status: "ID is not a number"});
         } else {
-            const createPostResponse = await PostController.createPost(comment, eventId);
+            let imageName = null;
+            if(req.file){
+                imageName = req.file.filename;
+            }
+
+            const createPostResponse = await PostController.createPost(comment, imageName, eventId);
             if(!createPostResponse.success){
                 res.status(406);
             } else {
-                io.emit('post', createPostResponse.post);
+                let post = createPostResponse.post;
+
+                if(req.file){
+                    let path = "public/uploads/"+req.body.eventId;
+                    if(!fs.existsSync(path)){
+                        try {
+                            fs.mkdirSync(path);
+                        } catch (error){
+                            console.log(error);
+                        }
+                    }
+                    fs.rename("public/uploads/"+req.file.filename, path+"/"+req.file.filename, function(error) {
+                        console.log(error);
+                    });
+                }
+
+                io.emit('post', post);
                 res.status(201);
             }
             res.send(createPostResponse);
