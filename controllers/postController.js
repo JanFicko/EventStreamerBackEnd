@@ -1,17 +1,16 @@
 let Post = require('../models/post');
 let EventController = require('../controllers/eventController');
-let UserController = require('../controllers/userController');
 
 class PostController  {
 
-    static async createPost(comment, eventId){
+    static async createPost(comment, image, eventId){
         const event = await EventController.findEventById(eventId);
         if(!event){
             return {success:false, status:"Event does not exist"};
         }
 
         return new Post.postModel()
-            .save(new Post(undefined, comment, Date.now(), undefined, eventId), {method:"insert"})
+            .save(new Post(undefined, comment, image, Date.now(), undefined, eventId), {method:"insert"})
             .then((data) => {
                 return {success:true, post: data};
             })
@@ -23,7 +22,7 @@ class PostController  {
     static updatePost(comment, postId){
         return new Post.postModel()
             .where("postId", "=", postId)
-            .save(new Post(postId, comment, undefined, Date.now(), undefined, undefined), {method:"update", patch: true})
+            .save(new Post(postId, comment, undefined, undefined, Date.now(), undefined, undefined), {method:"update", patch: true})
             .then(() => {
                 return {success:true};
             })
