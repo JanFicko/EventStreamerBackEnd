@@ -33,7 +33,7 @@ const multer = require('multer');
                 imageName = req.filRe.filename;
             }
 
-            const createPostResponse = await PostController.createPost(json.komentar, imageName, json.id_dogodek);
+            const createPostResponse = await PostController.createPost(json.objava.komentar, imageName, json.id_dogodek);
             if(!createPostResponse.success){
                 res.status(406);
             } else {

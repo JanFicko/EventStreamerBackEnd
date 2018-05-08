@@ -24,12 +24,12 @@ class PostController  {
                     slika: image
                 });
 
-                dogodek.objava.push();
+                dogodek.objava.push(objava);
 
                 const database = await DatabaseHelper.saveToDatabase(dogodek);
 
                 if(database.success){
-                    return objava;
+                    return {success: true, post: objava};
                 } else{
                     return database;
                 }
