@@ -162,9 +162,10 @@ class PostController  {
         }
         DatabaseHelper.connect();
 
-        return dogodekModel.Dogodek.find({_id: eventId})
+        return dogodekModel.Dogodek.findOne({_id: eventId})
             .then((dogodek) => {
                 DatabaseHelper.disconnect();
+                console.log(dogodek);
                 if(dogodek.objava){
                     return dogodek.objava;
                 }else {
