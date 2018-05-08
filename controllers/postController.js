@@ -98,7 +98,7 @@ class PostController  {
 
             }).catch((err) => {
                 DatabaseHelper.disconnect();
-                return {success: false};
+                return {success: false, status: err.toString()};
             });
 
     }
