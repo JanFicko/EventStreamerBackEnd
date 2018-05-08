@@ -20,8 +20,7 @@ class EventController  {
             naziv: json.naziv,
             opis: json.opis,
             izvajalec: json.izvajalec,
-            datum: json.datum,
-            zacetek: json.zacetek,
+            datum: Date.now(),
             id_uporabnik: json.id_uporabnik
         });
 

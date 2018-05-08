@@ -21,7 +21,8 @@ class PostController  {
             .then(async (dogodek) => {
                 let objava = new objavaModel.Objava({
                     komentar: comment,
-                    slika: image
+                    slika: image,
+                    created_at: Date.now()
                 });
 
                 dogodek.objava.push(objava);
