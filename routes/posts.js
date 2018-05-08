@@ -25,13 +25,12 @@ const multer = require('multer');
     // objava
     router.route('/').post(/*upload.single("image"), */ async (req, res, next) => {
         const json = req.body;
-        console.log(json);
         if (!json.id_dogodek) {
             res.status(400).send({success:false, status: "Data not received"});
         } else {
             let imageName = null;
             if(req.file){
-                imageName = req.file.filename;
+                imageName = req.filRe.filename;
             }
 
             const createPostResponse = await PostController.createPost(json.komentar, imageName, json.id_dogodek);
@@ -104,6 +103,7 @@ const multer = require('multer');
     });
 
     /* UPDATE */
+    // objava
     router.route('/').put(async (req, res, next) => {
         const json = req.body;
 
@@ -121,6 +121,7 @@ const multer = require('multer');
     });
 
     /* DELETE */
+    // objava
     router.route('/').delete(async (req, res, next) => {
         let json = req.body;
 
