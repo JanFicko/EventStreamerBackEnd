@@ -7,23 +7,23 @@ const io = require('socket.io')(http);
 const fs = require("fs");
 const multer = require('multer');
 
-// io.on("connection", (socket) => {
-//
-//     let storage = multer.diskStorage({
-//         destination: function (req, file, cb){
-//             cb(null, "public/uploads/");
-//         },
-//         filename: function (req, file, cb){
-//             cb(null, Date.now() + ".png");
-//         }
-//     });
-//     let upload = multer({
-//         storage: storage
-//     });
+io.on("connection", (socket) => {
+
+    let storage = multer.diskStorage({
+        destination: function (req, file, cb){
+            cb(null, "public/uploads/");
+        },
+        filename: function (req, file, cb){
+            cb(null, Date.now() + ".png");
+        }
+    });
+    let upload = multer({
+        storage: storage
+    });
 
     /* CREATE */
     // objava
-    router.route('/').post(/*upload.single("image"), */ async (req, res, next) => {
+    router.route('/').post(upload.single("image"),  async (req, res, next) => {
         const json = req.body;
         if (!json.id_dogodek) {
             res.status(400).send({success:false, status: "Data not received"});
@@ -139,12 +139,12 @@ const multer = require('multer');
     });
 
 
-// });
-//
-// const port = process.env.PORT || 3001;
-//
-// http.listen(port, function(){
-//     console.log('listening in http://localhost:' + port);
-// });
+});
+
+const port = process.env.PORT || 3001;
+
+http.listen(port, function(){
+    console.log('listening in http://localhost:' + port);
+});
 
 module.exports = router;
