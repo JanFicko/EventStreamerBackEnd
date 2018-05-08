@@ -7,34 +7,34 @@ const io = require('socket.io')(http);
 const fs = require("fs");
 const multer = require('multer');
 
-io.on("connection", (socket) => {
-
-    let storage = multer.diskStorage({
-        destination: function (req, file, cb){
-            cb(null, "public/uploads/");
-        },
-        filename: function (req, file, cb){
-            cb(null, Date.now() + ".png");
-        }
-    });
-    let upload = multer({
-        storage: storage
-    });
+// io.on("connection", (socket) => {
+//
+//     let storage = multer.diskStorage({
+//         destination: function (req, file, cb){
+//             cb(null, "public/uploads/");
+//         },
+//         filename: function (req, file, cb){
+//             cb(null, Date.now() + ".png");
+//         }
+//     });
+//     let upload = multer({
+//         storage: storage
+//     });
 
     /* CREATE */
-    router.route('/').post(upload.single("image"), async (req, res, next) => {
-        const { comment, eventId} = req.body;
-        if (!eventId) {
+    // objava
+    router.route('/').post(/*upload.single("image"), */ async (req, res, next) => {
+        const json = req.body;
+        console.log(json);
+        if (!json.id_dogodek) {
             res.status(400).send({success:false, status: "Data not received"});
-        } else if(isNaN(parseInt(eventId))){
-            res.status(500).send({success:false, status: "ID is not a number"});
         } else {
             let imageName = null;
             if(req.file){
                 imageName = req.file.filename;
             }
 
-            const createPostResponse = await PostController.createPost(comment, imageName, eventId);
+            const createPostResponse = await PostController.createPost(json.komentar, imageName, json.id_dogodek);
             if(!createPostResponse.success){
                 res.status(406);
             } else {
@@ -61,25 +61,56 @@ io.on("connection", (socket) => {
         }
     });
 
+    // like
+    router.route('/like').post(async (req, res, next) => {
+        const id_uporabnik = req.body.id_uporabnik;
+        const id_dogodek = req.body.id_dogodek;
+        const id_objava = req.body.id_objava;
+
+        if (!id_dogodek || !id_objava || !id_uporabnik) {
+            res.status(400).send({success:false, status: "Data not received"});
+        } else {
+            const createPostResponse = await PostController.createLike(id_dogodek, id_objava, id_uporabnik);
+            if(!createPostResponse.success){
+                res.status(406);
+            } else {
+                res.status(201);
+            }
+            res.send(createPostResponse);
+        }
+    });
+
     /* READ */
+    // objave po id dogodka
     router.route('/:eventId').get(async (req, res, next) => {
-        let eventId = parseInt(req.params.eventId);
-        if(isNaN(eventId)){
-            res.status(400).send({success:false, status: "ID is not a number"});
+        const eventId = req.params.eventId;
+        if(!eventId){
+            res.status(400).send({success:false, status: "data not recieved"});
         } else {
             res.status(200).send(await PostController.findPostsByEventId(eventId));
         }
     });
 
+    // vsi likes na objavo
+    router.route('/:id_dogodek/:id_objava').get(async (req, res, next) => {
+        const id_dogodek = req.params.id_dogodek;
+        const id_objava = req.params.id_objava;
+
+        if(!id_dogodek || !id_objava){
+            res.status(400).send({success:false, status: "data not recieved"});
+        } else {
+            res.status(200).send(await PostController.getLikesByPost(id_dogodek, id_objava));
+        }
+    });
+
     /* UPDATE */
     router.route('/').put(async (req, res, next) => {
-        const { comment, postId  } = req.body;
-        if (!comment || !postId) {
+        const json = req.body;
+
+        if (!json.objava || !json.id_dogodek || !json.id_objava) {
             res.status(400).send({success:false, status: "Data not received"});
-        } else if(isNaN(parseInt(postId))){
-            res.status(500).send({success:false, status: "ID is not a number"});
         } else {
-            const updatePostResponse = await PostController.updatePost(comment, postId);
+            const updatePostResponse = await PostController.updatePost(json);
             if(!updatePostResponse.success){
                 res.status(406);
             } else {
@@ -91,13 +122,12 @@ io.on("connection", (socket) => {
 
     /* DELETE */
     router.route('/').delete(async (req, res, next) => {
-        let postId = req.body.postId;
-        if (!postId) {
+        let json = req.body;
+
+        if (!json) {
             res.status(400).send({success:false, status: "Data not received"});
-        } else if(isNaN(parseInt(postId))){
-            res.status(500).send({success:false, status: "ID is not a number"});
         } else {
-            const deletePostResponse = await PostController.deletePost(postId);
+            const deletePostResponse = await PostController.deletePost(json);
             if(!deletePostResponse.success){
                 res.status(404)
             } else {
@@ -108,12 +138,12 @@ io.on("connection", (socket) => {
     });
 
 
-});
-
-const port = process.env.PORT || 3001;
-
-http.listen(port, function(){
-    console.log('listening in http://localhost:' + port);
-});
+// });
+//
+// const port = process.env.PORT || 3001;
+//
+// http.listen(port, function(){
+//     console.log('listening in http://localhost:' + port);
+// });
 
 module.exports = router;
