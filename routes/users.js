@@ -3,14 +3,14 @@ const router = express.Router();
 const UserController = require('../controllers/userController');
 
 /* CREATE */
-// Uporabnik
+// Vnos uporabnik
 router.route('/').post(async (req, res, next) => {
-    const json = req.body;
+    const {ime, priimek, geslo, email, tip, medij} = req.body;
 
-    if (!json) {
+    if (!ime || !priimek || !geslo || !email || !tip || !medij) {
         res.status(400).send({success:false, status: "Data not received"});
     } else {
-        const createUserResponse = await UserController.createUser(json);
+        const createUserResponse = await UserController.createUser(ime, priimek, geslo, email, tip, medij);
         if(!createUserResponse.success){
             res.status(406)
         } else {
@@ -20,15 +20,14 @@ router.route('/').post(async (req, res, next) => {
     }
 });
 
-// Kategorija
+// Vnos kategorije
 router.route('/kategorija').post(async (req, res, next) => {
-   const json = req.body;
-   const id = (req.body.id_uporabnik).toString();
+   const {id_uporabnik, kategorije} = req.body;
 
    if(!json){
        res.status(400)
    } else {
-       const createUserResponse = await UserController.createKategorija(id, json);
+       const createUserResponse = await UserController.createKategorija(id_uporabnik, kategorije);
        if(!createUserResponse.success){
            res.status(406)
        }else{
@@ -39,13 +38,13 @@ router.route('/kategorija').post(async (req, res, next) => {
 });
 
 /* READ */
-// uporabniki
+// Pridobi vse uporabnike
 router.route("/").get(async (req, res, next) => {
     res.status(200).send(await UserController.getAllUsers());
 });
-//uporabnik - id
+// Pridobi uporabnika z ID-jem
 router.route('/:id').get(async (req, res, next) => {
-    const id = (req.params.id).toString();
+    const id = (req.params.id);
     if(!id){
         res.status(400).send({success:false, status: "No ID number"});
     } else {
@@ -58,13 +57,14 @@ router.route('/:id').get(async (req, res, next) => {
     }
 });
 
+// Prijava uporabnika
 router.route('/login').post(async (req, res, next) => {
-    const json = req.body;
+    const {email, geslo} = req.body;
 
-    if (!json.email || !json.geslo) {
+    if (!email || !geslo) {
         res.status(400).send({success:false, status: "Data not received"});
     } else {
-        const createUserResponse = await UserController.loginUser(json.email, json.geslo);
+        const createUserResponse = await UserController.loginUser(email, geslo);
         if(!createUserResponse){
             res.status(204).send();
         } else {
@@ -75,13 +75,13 @@ router.route('/login').post(async (req, res, next) => {
 
 /* UPDATE */
 router.route('/').put(async (req, res, next) => {
-    const json = req.body;
-    if (!json._id || !json.email || !json.geslo) {
+    const {_id, email, geslo, ime, priimek, tip, medij, seznamKategorij } = req.body;
+    if (!_id || !email || !geslo) {
         res.status(400).send({success:false, status: "Data not received"});
-    } else if(!(json._id).toString()){
+    } else if(!(_id).toString()){
         res.status(500).send({success:false, status: "ID is not a number"});
     } else {
-        const updateUserResponse = await UserController.updateUser(json);
+        const updateUserResponse = await UserController.updateUser(_id, email, geslo, ime, priimek, tip, medij, seznamKategorij);
         if(!updateUserResponse.success){
             res.status(406);
         } else {

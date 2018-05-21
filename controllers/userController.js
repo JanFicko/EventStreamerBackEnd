@@ -5,19 +5,19 @@ const DatabaseHelper = require('../helpers/databaseHelper');
 
 class UserController  {
 
-    static createUser(json){
-        DatabaseHelper.connect();
-        if(!ValidateHelper.validateEmail(json.email)){
+    static createUser(ime, priimek, geslo, email, tip, medij){
+        if(!ValidateHelper.validateEmail(email)){
             return {success:false, status: 'Email not valid'};
         }
+        DatabaseHelper.connect();
 
         let uporabnik = new userModel.Uporabnik({
-            ime: json.ime,
-            priimek: json.priimek,
-            geslo: json.geslo,
-            email: json.email,
-            tip: json.tip,
-            medij: json.medij
+            ime: ime,
+            priimek: priimek,
+            geslo: geslo,
+            email: email,
+            tip: tip,
+            medij: medij
         });
 
 
@@ -25,26 +25,28 @@ class UserController  {
             return {success: true}
         }).catch((err) => {
             return {success: false, status: err}
+        }).finally(() => {
+            DatabaseHelper.disconnect();
         });
     }
 
     /* VNOS KATEGORIJE */
-    static createKategorija(id, json){
+    static createKategorija(id, seznamKategorij){
         DatabaseHelper.connect();
 
         return userModel.Uporabnik.findOne({_id: id}).then((dogodek) => {
-            for(let kat in json){
+            for(let kategorija in seznamKategorij){
                 dogodek.kategorija.push(new kategorijaModel.Kategorija({
-                    naziv: json[kat].naziv
+                    naziv: json[kategorija].naziv
                 }));
             }
 
             return dogodek.save().then(() => {
-                DatabaseHelper.disconnect();
                 return {success: true}
             }).catch((err) => {
-                DatabaseHelper.disconnect();
                 return {success: false, status: err}
+            }).finally(() => {
+                DatabaseHelper.disconnect();
             });
         });
     }
@@ -58,7 +60,6 @@ class UserController  {
 
         return userModel.Uporabnik.findOne({email: email, geslo: geslo})
         .then((user) => {
-            DatabaseHelper.disconnect();
             if(user){
                 return user;
             }else{
@@ -66,59 +67,61 @@ class UserController  {
             }
         }).catch(() => {
             return {success: false, status: 'Wrong data'}
+        }).finally(() => {
+                DatabaseHelper.disconnect();
         });
 
     }
 
-    static updateUser(json){
+    static updateUser(_id, email, geslo, ime, priimek, tip, medij, seznamKategorij){
         if(!ValidateHelper.validateEmail(json.email)){
             return {success:false, status: 'Email not valid'};
         }
         DatabaseHelper.connect();
 
         return userModel.Uporabnik
-            .findOne({_id: json._id, email: json.email, geslo: json.geslo})
+            .findOne({_id: _id, email: email, geslo: geslo})
             .then((user) => {
-                user.ime = json.ime;
-                user.priimek = json.priimek;
-                user.geslo = json.geslo;
-                user.email = json.email;
-                user.tip = json.tip;
-                user.medij = json.medij;
-                user.kategorija = json.kategorija;
+                user.ime = ime;
+                user.priimek = priimek;
+                user.geslo = geslo;
+                user.email = email;
+                user.tip = tip;
+                user.medij = medij;
+                user.kategorija = seznamKategorij;
 
                 return user.save().then(() => {
-                    DatabaseHelper.disconnect();
                     return {success: true}
                 }).catch((err) => {
-                    DatabaseHelper.disconnect();
                     return {success: false, status: "1. "+err}
                 });
 
             }).catch((err) => {
-                DatabaseHelper.disconnect();
                 return {success: false, status: "2. "+err}
+            }).finally(() => {
+                DatabaseHelper.disconnect();
             });
     }
 
     static deleteUser(userId){
         DatabaseHelper.connect();
         return userModel.Uporabnik.remove({_id: userId}).then(() => {
-            DatabaseHelper.disconnect();
             return {success: true}
         }).catch((err) => {
             return {success: false, status: "1. "+err}
+        }).finally(() => {
+            DatabaseHelper.disconnect();
         });
     }
 
     static getAllUsers() {
         DatabaseHelper.connect();
         return userModel.Uporabnik.find(function (err, user) {
-            DatabaseHelper.disconnect();
             return user;
         }).catch(() => {
-            DatabaseHelper.disconnect();
             return {success: false, status: 'No Data'}
+        }).finally(() => {
+            DatabaseHelper.disconnect();
         });
     }
 
@@ -126,11 +129,11 @@ class UserController  {
         DatabaseHelper.connect();
         return userModel.Uporabnik.findOne({_id: userId})
         .then((user) => {
-            DatabaseHelper.disconnect();
             return user;
         }).catch(() => {
-            DatabaseHelper.disconnect();
             return {success: false, status: 'No Data'}
+        }).finally(() => {
+            DatabaseHelper.disconnect();
         });
 
     }
