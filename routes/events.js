@@ -5,12 +5,11 @@ const EventController = require('../controllers/eventController');
 /* CREATE */
 // dogodek
 router.route('/').post(async (req, res, next) => {
-    console.log(req.body);
-    const json = req.body;
+    const {naziv, opis, izvajalec, id_uporabnik} = req.body;
     if (!json || !json.id_uporabnik) {
         res.status(400).send({success:false, status: "Data not received"});
     } else {
-        const createEventResponse = await EventController.createEvent(json, json.id_uporabnik);
+        const createEventResponse = await EventController.createEvent(naziv, opis, izvajalec, id_uporabnik);
         if(!createEventResponse.success){
             res.status(406);
         } else {
@@ -22,12 +21,12 @@ router.route('/').post(async (req, res, next) => {
 
 // kategorija
 router.route('/kategorija').post(async (req, res, next) => {
-    const json = req.body;
+    const {kategorija, id_dogodek} = req.body;
 
-    if (!json.kategorija || !json.id_dogodek) {
+    if (!kategorija || !id_dogodek) {
         res.status(400).send({success:false, status: "Data not received"});
     } else {
-        const createEventResponse = await EventController.createKategorija(json, json.id_dogodek);
+        const createEventResponse = await EventController.createKategorija(kategorija, id_dogodek);
         if(!createEventResponse.success){
             res.status(406);
         } else {
@@ -39,12 +38,11 @@ router.route('/kategorija').post(async (req, res, next) => {
 
 // lokacija
 router.route('/lokacija').post(async (req, res, next) => {
-    console.log(req.body);
-    const json = req.body;
-    if (!json.lokacija || !json.id_dogodek) {
+    const {lokacija, id_dogodek} = req.body;
+    if (!lokacija || !id_dogodek) {
         res.status(400).send({success:false, status: "Data not received"});
     } else {
-        const createEventResponse = await EventController.createLokacija(json, json.id_dogodek);
+        const createEventResponse = await EventController.createLokacija(lokacija, id_dogodek);
         if(!createEventResponse.success){
             res.status(406);
         } else {

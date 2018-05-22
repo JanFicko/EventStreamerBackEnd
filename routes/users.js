@@ -22,12 +22,12 @@ router.route('/').post(async (req, res, next) => {
 
 // Vnos kategorije
 router.route('/kategorija').post(async (req, res, next) => {
-   const {id_uporabnik, kategorije} = req.body;
+   const {id, kategorija} = req.body;
 
-   if(!json){
+   if(!id || !kategorija){
        res.status(400)
    } else {
-       const createUserResponse = await UserController.createKategorija(id_uporabnik, kategorije);
+       const createUserResponse = await UserController.createKategorija(id, kategorija);
        if(!createUserResponse.success){
            res.status(406)
        }else{
@@ -75,19 +75,19 @@ router.route('/login').post(async (req, res, next) => {
 
 /* UPDATE */
 router.route('/').put(async (req, res, next) => {
-    const {_id, email, geslo, ime, priimek, tip, medij, seznamKategorij } = req.body;
-    if (!_id || !email || !geslo) {
+    const {id, email, geslo, ime, priimek, tip, medij, kategorija } = req.body;
+    if (!id || !email || !geslo) {
         res.status(400).send({success:false, status: "Data not received"});
-    } else if(!(_id).toString()){
+    } else if(!(id).toString()){
         res.status(500).send({success:false, status: "ID is not a number"});
     } else {
-        const updateUserResponse = await UserController.updateUser(_id, email, geslo, ime, priimek, tip, medij, seznamKategorij);
+        const updateUserResponse = await UserController.updateUser(id, email, geslo, ime, priimek, tip, medij, kategorija);
         if(!updateUserResponse.success){
             res.status(406);
         } else {
             res.status(202);
         }
-        res.send(updateUserResponse)
+        res.send(updateUserResponse);
     }
 });
 

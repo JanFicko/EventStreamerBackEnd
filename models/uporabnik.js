@@ -11,7 +11,7 @@ const UporabnikSchema = new Schema({
         uuid: {type: UUID, default: uuid.v4},
         ime: String,
         priimek: String,
-        geslo: String,
+        geslo: { type: String, select: false },
         email: {type: String, required: true, index: {unique: true}},
         tip: String,
         medij: String,
