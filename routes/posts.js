@@ -7,7 +7,7 @@ const io = require('socket.io')(http);
 const fs = require("fs");
 const multer = require('multer');
 
-io.on("connection", (socket) => {
+//io.on("connection", (socket) => {
 
     let storage = multer.diskStorage({
         destination: function (req, file, cb){
@@ -23,24 +23,25 @@ io.on("connection", (socket) => {
 
     /* CREATE */
     // objava
-    router.route('/').post(upload.single("image"),  async (req, res, next) => {
-        const json = req.body;
-        if (!json.id_dogodek) {
+    router.route('/').post(upload.single("image"), async (req, res, next) => {
+        const {id_dogodek, komentar} = req.body;
+
+        if (!id_dogodek) {
             res.status(400).send({success:false, status: "Data not received"});
         } else {
             let imageName = null;
             if(req.file){
-                imageName = req.filRe.filename;
+                imageName = req.file.filename;
             }
 
-            const createPostResponse = await PostController.createPost(json.komentar, imageName, json.id_dogodek);
+            const createPostResponse = await PostController.createPost(komentar, imageName, id_dogodek);
             if(!createPostResponse.success){
                 res.status(406);
             } else {
                 let post = createPostResponse.post;
 
                 if(req.file){
-                    let path = "public/uploads/"+req.body.eventId;
+                    let path = "public/uploads/"+id_dogodek;
                     if(!fs.existsSync(path)){
                         try {
                             fs.mkdirSync(path);
@@ -62,9 +63,7 @@ io.on("connection", (socket) => {
 
     // like
     router.route('/like').post(async (req, res, next) => {
-        const id_uporabnik = req.body.id_uporabnik;
-        const id_dogodek = req.body.id_dogodek;
-        const id_objava = req.body.id_objava;
+        const {id_uporabnik, id_dogodek, id_objava} = req.body;
 
         if (!id_dogodek || !id_objava || !id_uporabnik) {
             res.status(400).send({success:false, status: "Data not received"});
@@ -84,7 +83,7 @@ io.on("connection", (socket) => {
     router.route('/:eventId').get(async (req, res, next) => {
         const eventId = req.params.eventId;
         if(!eventId){
-            res.status(400).send({success:false, status: "data not recieved"});
+            res.status(400).send({success:false, status: "Data not received"});
         } else {
             res.status(200).send(await PostController.findPostsByEventId(eventId));
         }
@@ -96,7 +95,7 @@ io.on("connection", (socket) => {
         const id_objava = req.params.id_objava;
 
         if(!id_dogodek || !id_objava){
-            res.status(400).send({success:false, status: "data not recieved"});
+            res.status(400).send({success:false, status: "Data not received"});
         } else {
             res.status(200).send(await PostController.getLikesByPost(id_dogodek, id_objava));
         }
@@ -105,12 +104,14 @@ io.on("connection", (socket) => {
     /* UPDATE */
     // objava
     router.route('/').put(async (req, res, next) => {
-        const json = req.body;
+        const {id_dogodek, objava} = req.body;
 
-        if (!json.objava || !json.id_dogodek || !json.id_objava) {
+        console.log(objava[0]._id);
+
+        if (!id_dogodek || !objava) {
             res.status(400).send({success:false, status: "Data not received"});
         } else {
-            const updatePostResponse = await PostController.updatePost(json);
+            const updatePostResponse = await PostController.updatePost(id_dogodek, objava[0]._id, objava);
             if(!updatePostResponse.success){
                 res.status(406);
             } else {
@@ -123,12 +124,12 @@ io.on("connection", (socket) => {
     /* DELETE */
     // objava
     router.route('/').delete(async (req, res, next) => {
-        let json = req.body;
+        let {id_dogodek, id_objava} = req.body;
 
-        if (!json) {
+        if (!id_dogodek || !id_objava) {
             res.status(400).send({success:false, status: "Data not received"});
         } else {
-            const deletePostResponse = await PostController.deletePost(json);
+            const deletePostResponse = await PostController.deletePost(id_dogodek, id_objava);
             if(!deletePostResponse.success){
                 res.status(404)
             } else {
@@ -139,12 +140,12 @@ io.on("connection", (socket) => {
     });
 
 
-});
+//});
 
-const port = process.env.PORT || 3001;
+/*const port = process.env.PORT || 3001;
 
 http.listen(port, function(){
     console.log('listening in http://localhost:' + port);
-});
+});*/
 
 module.exports = router;

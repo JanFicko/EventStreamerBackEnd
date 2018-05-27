@@ -5,11 +5,12 @@ const EventController = require('../controllers/eventController');
 /* CREATE */
 // dogodek
 router.route('/').post(async (req, res, next) => {
-    const {naziv, opis, izvajalec, id_uporabnik} = req.body;
-    if (!json || !json.id_uporabnik) {
+    const {naziv, opis, izvajalec, datum, id_uporabnik} = req.body;
+
+    if (!naziv || !opis || !izvajalec || !datum || !id_uporabnik) {
         res.status(400).send({success:false, status: "Data not received"});
     } else {
-        const createEventResponse = await EventController.createEvent(naziv, opis, izvajalec, id_uporabnik);
+        const createEventResponse = await EventController.createEvent(naziv, opis, izvajalec, datum, id_uporabnik);
         if(!createEventResponse.success){
             res.status(406);
         } else {
@@ -54,12 +55,12 @@ router.route('/lokacija').post(async (req, res, next) => {
 
 // hashtag
 router.route('/hashtag').post(async (req, res, next) => {
-    console.log(req.body);
-    const json = req.body;
-    if (!json.hashtag || !json.id_dogodek) {
+    const {hashtag, id_dogodek} = req.body;
+
+    if (!hashtag || !id_dogodek) {
         res.status(400).send({success:false, status: "Data not received"});
     } else {
-        const createEventResponse = await EventController.createHashtag(json, json.id_dogodek);
+        const createEventResponse = await EventController.createHashtag(hashtag, id_dogodek);
         if(!createEventResponse.success){
             res.status(406);
         } else {
@@ -99,11 +100,12 @@ router.route('/:query').get(async (req, res, next) => {
 /* UPDATE */
 // event
 router.route('/').put(async (req, res, next) => {
-    const json = req.body;
-    if (!json._id) {
+    const {id_dogodek, naziv, opis, izvajalec, datum} = req.body;
+
+    if (!id_dogodek || !naziv || !opis || !izvajalec || !datum) {
         res.status(400).send({success:false, status: "Data not received"});
     } else {
-        const updateEventResponse = await EventController.updateEvent(json._id, json);
+        const updateEventResponse = await EventController.updateEvent(id_dogodek, naziv, opis, izvajalec, datum);
         if(!updateEventResponse.success){
             res.status(406);
         } else {
@@ -113,53 +115,6 @@ router.route('/').put(async (req, res, next) => {
     }
 });
 
-// kategorija
-router.route('/kategorija').put(async (req, res, next) => {
-    const json = req.body;
-    if (!json.id_dogodek) {
-        res.status(400).send({success:false, status: "Data not received"});
-    } else {
-        const updateEventResponse = await EventController.updateKategorija(json.id_dogodek, json);
-        if(!updateEventResponse.success){
-            res.status(406);
-        } else {
-            res.status(202);
-        }
-        res.send(updateEventResponse)
-    }
-});
-
-// lokacija
-router.route('/lokacija').put(async (req, res, next) => {
-    const json = req.body;
-    if (!json.id_dogodek) {
-        res.status(400).send({success:false, status: "Data not received"});
-    } else {
-        const updateEventResponse = await EventController.updateLokacija(json.id_dogodek, json);
-        if(!updateEventResponse.success){
-            res.status(406);
-        } else {
-            res.status(202);
-        }
-        res.send(updateEventResponse)
-    }
-});
-
-// hashtag
-router.route('/hashtag').put(async (req, res, next) => {
-    const json = req.body;
-    if (!json.id_dogodek) {
-        res.status(400).send({success:false, status: "Data not received"});
-    } else {
-        const updateEventResponse = await EventController.updateHashtag(json.id_dogodek, json);
-        if(!updateEventResponse.success){
-            res.status(406);
-        } else {
-            res.status(202);
-        }
-        res.send(updateEventResponse)
-    }
-});
 
 /* DELETE */
 router.route('/').delete(async (req, res, next) => {

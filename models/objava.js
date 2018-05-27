@@ -7,6 +7,7 @@ const ObjavaSchema = new Schema({
         id_uporabnik: Schema.Types.ObjectId,
         komentar: String,
         slika: String,
+        datum: String,
         like: [like.LikeSchema]
     });
 

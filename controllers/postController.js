@@ -9,45 +9,36 @@ class PostController  {
 
     /* CREATE */
     // objava
-    static async createPost(comment, image, eventId){
-        const event = await EventController.findEventById(eventId);
-        if(!event){
-            return {success:false, status: "Event does not exist"};
-        }
-
+    static createPost(comment, image, id_dogodek){
         DatabaseHelper.connect();
 
-        return dogodekModel.Dogodek.findOne({_id: eventId})
-            .then(async (dogodek) => {
+        return dogodekModel.Dogodek
+            .findOne({_id: id_dogodek})
+            .then((dogodek) => {
+
                 let objava = new objavaModel.Objava({
                     komentar: comment,
                     slika: image,
-                    created_at: Date.now()
+                    datum: Date.now()
                 });
 
                 dogodek.objava.push(objava);
 
-                const database = await DatabaseHelper.saveToDatabase(dogodek);
-
-                if(database.success){
-                    return {success: true, post: objava};
-                } else{
-                    return database;
-                }
-
+                return dogodek.save().then((dogodek) => {
+                    DatabaseHelper.disconnect();
+                    return {success: true, post: dogodek};
+                }).catch((err) => {
+                    DatabaseHelper.disconnect();
+                    return {success: false, status: err.errmsg}
+                });
             }).catch((err) => {
                 DatabaseHelper.disconnect();
-                return {success: false};
+                return {success: false, status: err.errmsg};
             });
     }
 
     // like
     static async createLike(id_dogodek, id_objava, id_uporabnik){
-        const event = await EventController.findEventById(id_dogodek);
-        if(!event){
-            return {success:false, status: "Event does not exist"};
-        }
-
         const user = await UserController.findUserById(id_uporabnik);
         if(!user){
             return {success:false, status: "User does not exist"};
@@ -56,7 +47,7 @@ class PostController  {
         DatabaseHelper.connect();
 
         return dogodekModel.Dogodek.findOne({_id: id_dogodek})
-        .then(async (dogodek) => {
+        .then((dogodek) => {
             let objava = dogodek.objava.filter(function(objava){
                 return objava._id == id_objava;
             });
@@ -65,107 +56,76 @@ class PostController  {
                 return like.id_uporabnik == id_uporabnik;
             });
 
-            let newLike = new likeModel.Like({
-                id_uporabnik: id_uporabnik,
-                like: true
-            });
-
             if(!like.length){
-                objava[0].like.push();
-
-            }else{
-                if(like[0].like){
-                    like[0].like = false;
-                }else{
-                    like[0].like = true;
-                }
+                like = new likeModel.Like({
+                    id_uporabnik: id_uporabnik,
+                    like: true
+                });
+                objava[0].like.push(like);
+            } else {
+                like[0].like = !like[0].like;
             }
 
-            const database = await DatabaseHelper.saveToDatabase(dogodek);
-
-            if(database.success){
-                return newLike  ;
-            } else{
-                return database;
-            }
-
+            return dogodek.save().then((dogodek) => {
+                DatabaseHelper.disconnect();
+                return {success: true, post: dogodek.objava};
+            }).catch((err) => {
+                DatabaseHelper.disconnect();
+                return {success: false, status: err.errmsg}
+            });
         }).catch((err) => {
-            return {success: false, status: "1. "+err};
+            return {success: false, status: err.errmsg};
         });
     }
 
     /* UPDATE */
     // objava
-    static async updatePost(json){
-        const event = await EventController.findEventById(json.id_dogodek);
-        if(!event){
-            return {success: false, status: "Event does not exist"};
-        }
+    static updatePost(id_dogodek, id_objava, objava){
         DatabaseHelper.connect();
 
-        return dogodekModel.Dogodek.findOne({_id: json.id_dogodek})
-            .then(async (dogodek) => {
-                let objava = dogodek.objava.filter(function(objava){
-                    return objava._id == json.id_objava;
+        return dogodekModel.Dogodek.findOne({_id: id_dogodek})
+            .then((dogodek) => {
+
+                let novaObjava = dogodek.objava.filter(function(objava){
+                    return objava._id == id_objava;
                 });
 
-                objava[0].komentar = json.objava.komentar;
-                console.log(objava);
+                novaObjava[0].komentar = objava[0].komentar;
 
-                const database = await DatabaseHelper.saveToDatabase(dogodek);
-
-                if(database.success){
-                    return objava[0];
-                } else{
-                    return database;
-                }
-
+                return DatabaseHelper.saveToDatabase(dogodek);
             }).catch((err) => {
                 DatabaseHelper.disconnect();
-                return {success: false, status: err.toString()};
+                return {success: false, status: err.errmsg};
             });
 
     }
 
     /* DELETE */
     // objava
-    static deletePost(json){
+    static deletePost(id_dogodek, id_objava){
         DatabaseHelper.connect();
-        return dogodekModel.Dogodek.findOne({_id: json.id_dogodek})
-            .then(async (dogodek) => {
-                let objava = dogodek.objava.filter(function(objava){
-                    return objava._id != json.id_objava;
+
+        return objavaModel.Objava
+                .remove({_id: id_objava})
+                .then(() => {
+                        return {success: true};
+                }).catch((err) => {
+                    DatabaseHelper.disconnect();
+                    return {success: false, status: err.errmsg};
                 });
-                dogodek.objava = objava;
 
-                const database = await DatabaseHelper.saveToDatabase(dogodek);
-
-                if(database.success){
-                    return objava;
-                } else{
-                    return database;
-                }
-
-            return {success: true}
-        }).catch((err) => {
-            DatabaseHelper.disconnect();
-            return {success: false, status: "1. "+err}
-        });
     }
 
     /* GET */
     // objave by id dogodek
     static async findPostsByEventId(eventId) {
-        const event = await EventController.findEventById(eventId);
-        if(!event){
-            return {success: false, status: "Event does not exist"};
-        }
         DatabaseHelper.connect();
 
-        return dogodekModel.Dogodek.findOne({_id: eventId})
+        return dogodekModel.Dogodek
+            .findOne({_id: eventId})
             .then((dogodek) => {
                 DatabaseHelper.disconnect();
-                console.log(dogodek);
+
                 if(dogodek.objava){
                     return dogodek.objava;
                 }else {
@@ -178,21 +138,20 @@ class PostController  {
             });
     }
 
-    static async getLikesByPost(id_dogodek, id_objava){
-        const event = await EventController.findEventById(id_dogodek);
-        if(!event){
-            return {success:false, status: "Event does not exist"};
-        }
+    static getLikesByPost(id_dogodek, id_objava){
         DatabaseHelper.connect();
 
-        return dogodekModel.Dogodek.findOne({_id: id_dogodek}).then((dogodek) => {
-            let objava = dogodek.objava.filter(function(objava){
-                return objava._id == id_objava;
-            });
+        return dogodekModel.Dogodek
+            .findOne({_id: id_dogodek})
+            .then((dogodek) => {
 
-            DatabaseHelper.disconnect();
+                let objava = dogodek.objava.filter(function(objava){
+                    return objava._id == id_objava;
+                });
 
-            return objava[0].like;
+                DatabaseHelper.disconnect();
+
+                return objava[0].like;
 
         }).catch((err) => {
             DatabaseHelper.disconnect();

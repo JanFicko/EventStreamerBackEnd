@@ -9,42 +9,48 @@ class EventController  {
 
     /* CREATE */
     // event
-    static async createEvent(naziv, opis, izvajalec, id_uporabnik) {
+    static async createEvent(naziv, opis, izvajalec, datum, id_uporabnik) {
         const user = await UserController.findUserById(id_uporabnik);
         if (!user) {
             return {success: false, status: "User does not exist"};
         }
+
         DatabaseHelper.connect();
 
         let dogodek = new dogodekModel.Dogodek({
             naziv: naziv,
             opis: opis,
             izvajalec: izvajalec,
-            datum: Date.now(),
+            datum: datum,
             id_uporabnik: id_uporabnik
         });
-        DatabaseHelper.disconnect();
 
-        return DatabaseHelper.saveToDatabase(dogodek);
+        return dogodek.save().then(() => {
+            DatabaseHelper.disconnect();
+            return {success: true}
+        }).catch((err) => {
+            DatabaseHelper.disconnect();
+            return {success: false, status: err.errmsg}
+        });
+
     }
 
     // kategorija
-    static async createKategorija(kategorija, id_dogodek) {
-        const dogodek = await this.findEventById(id_dogodek);
-        if (!dogodek) {
-            return {success: false, status: "Event does not exist"};
-        }
+    static createKategorija(kategorija, id_dogodek) {
         DatabaseHelper.connect();
 
-        return dogodekModel.Dogodek.findOne({_id: id_dogodek}).then((dogodek) => {
-            DatabaseHelper.disconnect();
-            for(let kat in kategorija){
-                dogodek.kategorija.push(new kategorijaModel.Kategorija({
-                    naziv: json.kategorija[kat].naziv
-                }));
-            }
+        return dogodekModel.Dogodek
+            .findOne({_id: id_dogodek})
+            .then((dogodek) => {
+                dogodek.kategorija = kategorija;
 
-            return DatabaseHelper.saveToDatabase(dogodek);
+                return dogodek.save().then(() => {
+                    DatabaseHelper.disconnect();
+                    return {success: true}
+                }).catch((err) => {
+                    DatabaseHelper.disconnect();
+                    return {success: false, status: err.errmsg}
+                });
         }).catch((err) => {
             DatabaseHelper.disconnect();
             return {success: false, status: err.errmsg}
@@ -53,22 +59,20 @@ class EventController  {
 
     // lokacija
     static async createLokacija(lokacija, id_dogodek) {
-        const dogodek = await this.findEventById(id_dogodek);
-        if (!dogodek) {
-            return {success: false, status: "Event does not exist"};
-        }
         DatabaseHelper.connect();
 
-        return dogodekModel.Dogodek.findOne({_id: id_dogodek}).then((dogodek) => {
-            DatabaseHelper.disconnect();
-            for(let lok in lokacija){
-                dogodek.lokacija.push(new lokacijaModel.Lokacija({
-                    longitude: json.lokacija[lok].longitude,
-                    latitude: json.lokacija[lok].latitude
-                }));
-            }
+        return dogodekModel.Dogodek
+            .findOne({_id: id_dogodek})
+            .then((dogodek) => {
+                dogodek.lokacija = lokacija;
 
-            return DatabaseHelper.saveToDatabase(dogodek);
+                return dogodek.save().then(() => {
+                    DatabaseHelper.disconnect();
+                    return {success: true}
+                }).catch((err) => {
+                    DatabaseHelper.disconnect();
+                    return {success: false, status: err.errmsg}
+                });
         }).catch((err) => {
             DatabaseHelper.disconnect();
             return {success: false, status: err.errmsg}
@@ -76,23 +80,20 @@ class EventController  {
     }
 
     // hashtag
-    static async createHashtag(json, id_dogodek) {
-        const dogodek = await this.findEventById(id_dogodek);
-        if (!dogodek) {
-            return {success: false, status: "Event does not exist"};
-        }
+    static async createHashtag(hashtag, id_dogodek) {
         DatabaseHelper.connect();
 
         return dogodekModel.Dogodek.findOne({_id: id_dogodek})
             .then((dogodek) => {
-                DatabaseHelper.disconnect();
-                for(let kat in json.hashtag){
-                    dogodek.hashtag.push(new hashtagModel.Hashtag({
-                        hashtag: json.hashtag[kat].hashtag
-                    }));
-                }
+                dogodek.hashtag = hashtag;
 
-                return DatabaseHelper.saveToDatabase(dogodek);
+                return dogodek.save().then(() => {
+                    DatabaseHelper.disconnect();
+                    return {success: true}
+                }).catch((err) => {
+                    DatabaseHelper.disconnect();
+                    return {success: false, status: err.errmsg}
+                });
         }).catch((err) => {
             DatabaseHelper.disconnect();
             return {success: false, status: err.errmsg}
@@ -101,82 +102,25 @@ class EventController  {
 
     /* UPDATE */
     // event
-    static async updateEvent(id_dogodek, json){
-        const dogodek = await this.findEventById(id_dogodek);
-        if (!dogodek) {
-            return {success: false, status: "User does not exist"};
-        }
+    static updateEvent(id_dogodek, naziv, opis, izvajalec, datum){
         DatabaseHelper.connect();
 
-        return dogodekModel.Dogodek.findOne({_id: id_dogodek})
+        return dogodekModel.Dogodek
+            .findOne({_id: id_dogodek})
             .then((dogodek) => {
-                DatabaseHelper.disconnect();
-                dogodek.naziv = json.naziv;
-                dogodek.opis = json.opis;
-                dogodek.izvajalec = json.izvajalec;
-                dogodek.datum = json.datum;
-                dogodek.zacetek = json.zacetek;
 
-                return DatabaseHelper.saveToDatabase(dogodek);
-        }).catch((err) => {
-            DatabaseHelper.disconnect();
-            return {success: false, status: err.errmsg}
-        });
-    }
+                dogodek.naziv = naziv;
+                dogodek.opis = opis;
+                dogodek.izvajalec = izvajalec;
+                dogodek.datum = datum;
 
-    // kategorija - s tem tudi izbrises
-    static async updateKategorija(id_dogodek, json){
-        const dogodek = await this.findEventById(id_dogodek);
-        if (!dogodek) {
-            return {success: false, status: "User does not exist"};
-        }
-        DatabaseHelper.connect();
-
-        return dogodekModel.Dogodek.findOne({_id: id_dogodek})
-            .then((dogodek) => {
-                DatabaseHelper.disconnect();
-                dogodek.kategorija = json.kategorija;
-
-                return DatabaseHelper.saveToDatabase(dogodek);
-        }).catch((err) => {
-            DatabaseHelper.disconnect();
-            return {success: false, status: err.errmsg}
-        });
-    }
-
-    // lokacija - s tem tudi izbrises
-    static async updateLokacija(id_dogodek, json){
-        const dogodek = await this.findEventById(id_dogodek);
-        if (!dogodek) {
-            return {success: false, status: "User does not exist"};
-        }
-        DatabaseHelper.connect();
-
-        return dogodekModel.Dogodek.findOne({_id: id_dogodek})
-            .then((dogodek) => {
-                DatabaseHelper.disconnect();
-                dogodek.lokacija = json.lokacija;
-
-                return DatabaseHelper.saveToDatabase(dogodek);
-        }).catch((err) => {
-            DatabaseHelper.disconnect();
-            return {success: false, status: err.errmsg}
-        });
-    }
-
-    // hashtag - s tem tudi izbrises
-    static async updateHashtag(id_dogodek, json){
-        const dogodek = await this.findEventById(id_dogodek);
-        if (!dogodek) {
-            return {success: false, status: "User does not exist"};
-        }
-        DatabaseHelper.connect();
-
-        return dogodekModel.Dogodek.findOne({_id: id_dogodek}).then((dogodek) => {
-            DatabaseHelper.disconnect();
-            dogodek.hashtag = json.hashtag;
-
-            return DatabaseHelper.saveToDatabase(dogodek);
+                return dogodek.save().then(() => {
+                    DatabaseHelper.disconnect();
+                    return {success: true}
+                }).catch((err) => {
+                    DatabaseHelper.disconnect();
+                    return {success: false, status: err.errmsg}
+                });
         }).catch((err) => {
             DatabaseHelper.disconnect();
             return {success: false, status: err.errmsg}
@@ -187,9 +131,11 @@ class EventController  {
     // event
     static deleteEvent(eventId){
         DatabaseHelper.connect();
-        return dogodekModel.Dogodek.remove({_id: eventId}).then(() => {
-            DatabaseHelper.disconnect();
-            return {success: true}
+        return dogodekModel.Dogodek
+            .remove({_id: eventId})
+            .then(() => {
+                DatabaseHelper.disconnect();
+                return {success: true}
         }).catch((err) => {
             DatabaseHelper.disconnect();
             return {success: false, status: err.errmsg}
@@ -206,7 +152,7 @@ class EventController  {
             return dogodek;
         }).catch(() => {
             DatabaseHelper.disconnect();
-            return {success: false, status: 'No Data'}
+            return {success: false, status: 'No Data'};
         });
     }
 
@@ -214,7 +160,8 @@ class EventController  {
     static findEventById(eventId) {
         DatabaseHelper.connect();
 
-        return dogodekModel.Dogodek.findOne({_id: eventId})
+        return dogodekModel.Dogodek
+            .findOne({_id: eventId})
             .then((event) => {
                 DatabaseHelper.disconnect();
                 return event;
@@ -227,14 +174,14 @@ class EventController  {
     // by query
     static findEventsByQuery(query) {
         DatabaseHelper.connect();
-        console.log(query);
-        return dogodekModel.Dogodek.findOne({naziv: query})
+
+        return dogodekModel.Dogodek.find({naziv: query})
             .then((event) => {
                 DatabaseHelper.disconnect();
                 return event;
             }).catch(() => {
                 DatabaseHelper.disconnect();
-                return null;
+                return {success: false, status: 'No Data'};
             });
     }
 
