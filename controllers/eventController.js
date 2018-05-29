@@ -9,7 +9,7 @@ class EventController  {
 
     /* CREATE */
     // event
-    static async createEvent(naziv, opis, izvajalec, datum, id_uporabnik) {
+    static async createEvent(naziv, opis, datum, id_uporabnik, lokacija, kategorija) {
         const user = await UserController.findUserById(id_uporabnik);
         if (!user) {
             return {success: false, status: "User does not exist"};
@@ -20,9 +20,10 @@ class EventController  {
         let dogodek = new dogodekModel.Dogodek({
             naziv: naziv,
             opis: opis,
-            izvajalec: izvajalec,
             datum: datum,
-            id_uporabnik: id_uporabnik
+            id_uporabnik: id_uporabnik,
+            lokacija: lokacija,
+            kategorija: kategorija
         });
 
         return dogodek.save().then(() => {
@@ -102,7 +103,7 @@ class EventController  {
 
     /* UPDATE */
     // event
-    static updateEvent(id_dogodek, naziv, opis, izvajalec, datum){
+    static updateEvent(id_dogodek, naziv, opis, datum){
         DatabaseHelper.connect();
 
         return dogodekModel.Dogodek
@@ -111,7 +112,6 @@ class EventController  {
 
                 dogodek.naziv = naziv;
                 dogodek.opis = opis;
-                dogodek.izvajalec = izvajalec;
                 dogodek.datum = datum;
 
                 return dogodek.save().then(() => {

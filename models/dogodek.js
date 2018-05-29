@@ -8,7 +8,6 @@ const hashtag = require('./hashtag.js');
 const DogodekSchema = new Schema({
         naziv: String,
         opis: String,
-        izvajalec: String,
         datum: String,
         objava: [objava.ObjavaSchema],
         kategorija: [kategorija.KategorijaSchema],

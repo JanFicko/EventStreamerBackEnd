@@ -5,12 +5,12 @@ const EventController = require('../controllers/eventController');
 /* CREATE */
 // dogodek
 router.route('/').post(async (req, res, next) => {
-    const {naziv, opis, izvajalec, datum, id_uporabnik} = req.body;
+    const {naziv, opis, datum, id_uporabnik, lokacija, kategorija} = req.body;
 
-    if (!naziv || !opis || !izvajalec || !datum || !id_uporabnik) {
+    if (!naziv || !opis || !datum || !id_uporabnik) {
         res.status(400).send({success:false, status: "Data not received"});
     } else {
-        const createEventResponse = await EventController.createEvent(naziv, opis, izvajalec, datum, id_uporabnik);
+        const createEventResponse = await EventController.createEvent(naziv, opis, datum, id_uporabnik, lokacija, kategorija);
         if(!createEventResponse.success){
             res.status(406);
         } else {
