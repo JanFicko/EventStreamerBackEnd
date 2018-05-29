@@ -9,6 +9,7 @@ class UserController  {
         if(!ValidateHelper.validateEmail(email)){
             return {success:false, status: 'Email not valid'};
         }
+
         DatabaseHelper.connect();
 
         let uporabnik = new userModel.Uporabnik({
@@ -19,7 +20,6 @@ class UserController  {
             tip: tip,
             medij: medij
         });
-
 
         return uporabnik.save().then(() => {
             DatabaseHelper.disconnect();
@@ -64,9 +64,9 @@ class UserController  {
             if(user){
                 return user;
             }else{
-                return {success: false, status: 'Wrong data'}
+                return {success: false, status: 'User not yet registered'}
             }
-        }).catch(() => {
+        }).catch((err) => {
                 DatabaseHelper.disconnect();
             return {success: false, status: 'Wrong data'}
         });

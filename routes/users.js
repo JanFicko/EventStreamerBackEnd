@@ -60,7 +60,7 @@ router.route('/:idUporabnik').get(async (req, res, next) => {
 
 // Prijava uporabnika
 router.route('/login').post(async (req, res, next) => {
-    const {email, geslo} = req.body;
+    const {email, geslo, medij} = req.body;
 
     if (!email || !geslo) {
         res.status(400).send({success:false, status: "Data not received"});
