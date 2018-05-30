@@ -2,12 +2,14 @@ const express = require('express');
 const app = express();
 const router = express.Router();
 const PostController = require('../controllers/postController');
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
+const server = require("http").createServer(app);
+//const http = require('http').Server(app);
+//const io = require('socket.io')(http);
+const io = require('socket.io').listen(server);
 const fs = require("fs");
 const multer = require('multer');
 
-//io.on("connection", (socket) => {
+io.on("connection", (socket) => {
 
     let storage = multer.diskStorage({
         destination: function (req, file, cb){
@@ -23,7 +25,7 @@ const multer = require('multer');
 
     /* CREATE */
     // objava
-    router.route('/').post(upload.single("image"), async (req, res, next) => {
+    router.route('/').post(upload.single("slika"), async (req, res, next) => {
         const {id_dogodek, komentar} = req.body;
 
         if (!id_dogodek) {
@@ -140,12 +142,8 @@ const multer = require('multer');
     });
 
 
-//});
+});
 
-/*const port = process.env.PORT || 3001;
-
-http.listen(port, function(){
-    console.log('listening in http://localhost:' + port);
-});*/
+server.listen(3001);
 
 module.exports = router;

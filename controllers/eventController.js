@@ -175,11 +175,14 @@ class EventController  {
     static findEventsByQuery(query) {
         DatabaseHelper.connect();
 
-        return dogodekModel.Dogodek.find({naziv: query})
+        return dogodekModel.Dogodek
+            .find({naziv: query})
             .then((event) => {
+                console.log(event);
                 DatabaseHelper.disconnect();
                 return event;
-            }).catch(() => {
+            }).catch((error) => {
+                console.log(error);
                 DatabaseHelper.disconnect();
                 return {success: false, status: 'No Data'};
             });

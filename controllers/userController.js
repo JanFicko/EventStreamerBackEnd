@@ -67,8 +67,8 @@ class UserController  {
                 return {success: false, status: 'User not yet registered'}
             }
         }).catch((err) => {
-                DatabaseHelper.disconnect();
-            return {success: false, status: 'Wrong data'}
+            DatabaseHelper.disconnect();
+            return {success: false, status: err.errmsg}
         });
 
     }

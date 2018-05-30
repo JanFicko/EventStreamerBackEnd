@@ -80,6 +80,7 @@ router.route("/").get(async (req, res, next) => {
 router.route('/:query').get(async (req, res, next) => {
     const query = req.params.query;
 
+    console.log(query);
     if(query) {
         let events = await EventController.findEventsByQuery(query);
 
