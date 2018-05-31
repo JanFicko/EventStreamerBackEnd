@@ -76,6 +76,7 @@ router.route("/").get(async (req, res, next) => {
     res.status(200).send(await EventController.getAllEvents());
 });
 
+
 // query
 router.route('/:query').get(async (req, res, next) => {
     const query = req.params.query;

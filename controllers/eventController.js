@@ -176,10 +176,24 @@ class EventController  {
         DatabaseHelper.connect();
 
         return dogodekModel.Dogodek
-            .find({naziv: query})
+            .find({naziv: { "$regex": query, "$options": "i" }}, function (err, docs) {
+                console.log(docs);
+            })
             .then((event) => {
+                if(Object.keys(event).length === 0){
+                    event = dogodekModel.Dogodek
+                        .find({opis: { "$regex": query, "$options": "i" }})
+                        .then((event) => {
+                            DatabaseHelper.disconnect();
+                            return event;
+                        }).catch((error) => {
+                            console.log(error);
+                            DatabaseHelper.disconnect();
+                            return {success: false, status: 'No Data'};
+                        });
+                }
+
                 console.log(event);
-                DatabaseHelper.disconnect();
                 return event;
             }).catch((error) => {
                 console.log(error);
