@@ -8,7 +8,9 @@ class Database{
     }
 
     static disconnect(){
-        mongoose.disconnect();
+        setTimeout( function () {
+            mongoose.disconnect();
+        }, 1000);
     }
 
     static saveToDatabase(data){

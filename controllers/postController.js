@@ -108,6 +108,7 @@ class PostController  {
         return objavaModel.Objava
                 .remove({_id: id_objava})
                 .then(() => {
+                    DatabaseHelper.disconnect();
                         return {success: true};
                 }).catch((err) => {
                     DatabaseHelper.disconnect();

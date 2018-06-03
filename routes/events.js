@@ -7,6 +7,8 @@ const EventController = require('../controllers/eventController');
 router.route('/').post(async (req, res, next) => {
     const {naziv, opis, datum, id_uporabnik, lokacija, kategorija} = req.body;
 
+    console.log(req.body);
+
     if (!naziv || !opis || !datum || !id_uporabnik) {
         res.status(400).send({success:false, status: "Data not received"});
     } else {

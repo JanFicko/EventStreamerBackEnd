@@ -31,6 +31,7 @@ class EventController  {
             return {success: true}
         }).catch((err) => {
             DatabaseHelper.disconnect();
+            console.log(err);
             return {success: false, status: err.errmsg}
         });
 

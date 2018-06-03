@@ -9,8 +9,6 @@ const io = require('socket.io').listen(server);
 const fs = require("fs");
 const multer = require('multer');
 
-io.on("connection", (socket) => {
-
     let storage = multer.diskStorage({
         destination: function (req, file, cb){
             cb(null, "public/uploads/");
@@ -23,10 +21,14 @@ io.on("connection", (socket) => {
         storage: storage
     });
 
+
+//io.on("connection", (socket) => {
     /* CREATE */
     // objava
     router.route('/').post(upload.single("slika"), async (req, res, next) => {
         const {id_dogodek, komentar} = req.body;
+
+        console.log(req.body);
 
         if (!id_dogodek) {
             res.status(400).send({success:false, status: "Data not received"});
@@ -62,6 +64,9 @@ io.on("connection", (socket) => {
             res.send(createPostResponse);
         }
     });
+
+
+//});
 
     // like
     router.route('/like').post(async (req, res, next) => {
@@ -141,9 +146,6 @@ io.on("connection", (socket) => {
         }
     });
 
-
-});
-
-server.listen(3001);
+//server.listen(3001);
 
 module.exports = router;
