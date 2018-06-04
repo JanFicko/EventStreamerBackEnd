@@ -66,7 +66,7 @@ io.on("connection", (socket) => {
     // like
     router.route('/like').post(async (req, res, next) => {
         const {id_uporabnik, id_dogodek, id_objava} = req.body;
-
+            console.log(req.body);
         if (!id_dogodek || !id_objava || !id_uporabnik) {
             res.status(400).send({success:false, status: "Data not received"});
         } else {

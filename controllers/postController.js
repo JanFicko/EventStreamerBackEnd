@@ -56,24 +56,29 @@ class PostController  {
                 return like.id_uporabnik == id_uporabnik;
             });
 
+            let likeStatus = true;
             if(!like.length){
                 like = new likeModel.Like({
                     id_uporabnik: id_uporabnik,
                     like: true
                 });
                 objava[0].like.push(like);
+                likeStatus = objava[0].like[0].like;
             } else {
                 like[0].like = !like[0].like;
+                likeStatus = like[0].like;
             }
 
             return dogodek.save().then((dogodek) => {
                 DatabaseHelper.disconnect();
-                return {success: true, post: dogodek.objava};
+                return {success: true, post: dogodek.objava, like: likeStatus};
             }).catch((err) => {
                 DatabaseHelper.disconnect();
-                return {success: false, status: err.errmsg}
+                console.log("1. -> ", err);
+                return {success: false, status: err};
             });
         }).catch((err) => {
+            console.log("2. -> "+err.errmsg);
             return {success: false, status: err.errmsg};
         });
     }
