@@ -63,7 +63,7 @@ class PostController  {
                     like: true
                 });
                 objava[0].like.push(like);
-                likeStatus = objava[0].like[0].like;
+                likeStatus = true;
             } else {
                 like[0].like = !like[0].like;
                 likeStatus = like[0].like;
